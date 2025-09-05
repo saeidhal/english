@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title data-ar="لوحة التحكم التفاعلية: مستويات تعلم اللغة الإنجليزية" data-en="Interactive Dashboard: English Learning Levels">لوحة التحكم التفاعلية: مستويات تعلم اللغة الإنجليزية</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* General Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: linear-gradient(-45deg, #1a1a1a, #2c2c2c, #3e3e3e);
+      background-size: 400% 400%;
+      animation: gradientAnimation 15s ease infinite;
+      color: white;
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative; /* For interactive background */
+    }
+
+    /* Animated Gradient Background */
+    @keyframes gradientAnimation {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Interactive Background Particles */
+    .bg-particles {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        z-index: -1;
+        pointer-events: none;
+    }
+
+    .particle {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        animation: floatAndFade 20s infinite ease-in-out;
+    }
+
+    @keyframes floatAndFade {
+        0% { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+        25% { opacity: 0.8; }
+        50% { transform: translateY(-100vh) translateX(50vw) scale(1.2); opacity: 0.5; }
+        75% { opacity: 0.2; }
+        100% { transform: translateY(-200vh) translateX(100vw) scale(0.8); opacity: 0; }
+    }
+
+
+    /* Header */
+    .dashboard-header {
+      background: rgba(0, 0, 0, 0.7);
+      padding: 30px 20px;
+      text-align: center;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+      border-bottom: 3px solid #ffd700;
+      position: relative; /* For lang toggle */
+      z-index: 100; /* Ensure header is above particles */
+    }
+
+    .dashboard-header h1 {
+      font-size: 3.5rem;
+      margin-bottom: 10px;
+      background: linear-gradient(45deg, #fff, #ffd700);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+    }
+
+    .dashboard-header p {
+      font-size: 1.3rem;
+      color: #e0e0e0;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px; /* Positioned to the right for RTL */
+      z-index: 2000;
+    }
+
+    html[dir="ltr"] .lang-toggle {
+      right: auto; /* Reset for LTR */
+      left: 20px; /* Positioned to the left for LTR */
+    }
+
+    .lang-toggle button {
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      color: white;
+      padding: 12px 18px;
+      font-size: 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(5px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .lang-toggle button i {
+      font-size: 1.2em;
+    }
+
+    .lang-toggle button:hover {
+      background: rgba(255, 255, 255, 0.4);
+      transform: scale(1.05);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+    }
+
+    /* Main Content */
+    .dashboard-container {
+      flex-grow: 1;
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px;
+      display: grid;
+      gap: 30px;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      animation: fadeIn 1s ease forwards;
+      z-index: 10; /* Ensure cards are above particles */
+      position: relative;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Common Card Styles */
+    .card {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(8px);
+      transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer; /* Indicate clickable cards */
+    }
+
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .card h3 {
+      font-size: 2.2rem;
+      margin-bottom: 20px;
+      color: #ffd700;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+      padding-bottom: 10px;
+    }
+
+    .card p {
+      font-size: 1.1rem;
+      color: #e0e0e0;
+      line-height: 1.7;
+    }
+
+    .card .icon {
+      font-size: 3.5rem;
+      color: #2ecc71; /* Green for levels */
+      margin-bottom: 20px;
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover .icon {
+      transform: scale(1.1);
+    }
+
+    /* Specific Card Styles */
+    .summary-card.clickable { /* Make summary card explicitly clickable */
+      cursor: pointer;
+    }
+
+    /* Modal (Popup) Styles */
+    .modal {
+      display: none; /* Hidden by default */
+      position: fixed; /* Stay in place */
+      z-index: 3000; /* Sit on top */
+      left: 0;
+      top: 0;
+      width: 100%; /* Full width */
+      height: 100%; /* Full height */
+      overflow: auto; /* Enable scroll if needed */
+      background-color: rgba(0,0,0,0.8); /* Black w/ opacity */
+      backdrop-filter: blur(5px);
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background: linear-gradient(135deg, #2a2a2a, #4a4a4a);
+      margin: auto;
+      padding: 30px;
+      border: 1px solid #888;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 800px; /* Increased max-width for more content */
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      position: relative;
+      animation: modalOpen 0.4s ease-out;
+      text-align: center;
+      display: flex; /* Use flex for internal layout */
+      flex-direction: column;
+      gap: 20px; /* Spacing between sections */
+    }
+
+    @keyframes modalOpen {
+      from { opacity: 0; transform: translateY(-50px) scale(0.9); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .modal-content h2 {
+      font-size: 2.5rem;
+      color: #ffd700;
+      margin-bottom: 15px;
+      border-bottom: 2px solid rgba(255,255,255,0.2);
+      padding-bottom: 10px;
+    }
+
+    .modal-content p {
+      font-size: 1.1rem;
+      color: #e0e0e0;
+      line-height: 1.7;
+      margin-bottom: 10px; /* Adjust margin for p tags */
+      text-align: justify; /* Justify text for better readability */
+    }
+
+    .modal-content .description-section {
+        margin-bottom: 20px;
+    }
+
+    .modal-content .skills-list {
+        list-style: none;
+        padding: 0;
+        margin-top: 15px;
+        text-align: start; /* Align list items to start */
+    }
+
+    .modal-content .skills-list li {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 10px 15px;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        font-size: 1rem;
+        border-left: 4px solid #9b59b6;
+        transition: background 0.2s ease;
+    }
+
+    .modal-content .skills-list li:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .close-button {
+      color: #aaa;
+      font-size: 2.5rem;
+      font-weight: bold;
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    html[dir="ltr"] .close-button {
+      right: auto;
+      left: 20px;
+    }
+
+    .close-button:hover,
+    .close-button:focus {
+      color: #f00;
+      transform: rotate(90deg);
+    }
+
+    .chart-container {
+      position: relative;
+      width: 100%;
+      height: 400px; /* Fixed height for consistency */
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .chart-container canvas {
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    /* Skill selection buttons for main chart modal */
+    .skill-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .skill-buttons button {
+      background: rgba(255, 215, 0, 0.2);
+      border: 1px solid #ffd700;
+      color: #ffd700;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(5px);
+    }
+
+    .skill-buttons button:hover,
+    .skill-buttons button.active {
+      background: #ffd700;
+      color: #2a2a2a;
+      box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+      transform: translateY(-2px);
+    }
+
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 30px;
+      font-size: 1.1rem;
+      color: #aaa;
+      border-top: 1px solid #444;
+      margin-top: auto;
+      background: rgba(0,0,0,0.2);
+      z-index: 100; /* Ensure footer is above particles */
+      position: relative;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 992px) {
+      .dashboard-container {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      }
+      .dashboard-header h1 {
+        font-size: 2.8rem;
+      }
+      .dashboard-header p {
+        font-size: 1.1rem;
+      }
+      .card h3 {
+        font-size: 1.8rem;
+      }
+      .card .icon {
+        font-size: 3rem;
+      }
+      .summary-card .value {
+        font-size: 3.5rem;
+      }
+      .summary-card .label {
+        font-size: 1.3rem;
+      }
+      .modal-content {
+        width: 95%;
+        padding: 25px;
+      }
+      .modal-content h2 {
+        font-size: 2rem;
+      }
+      .modal-content p {
+        font-size: 1rem;
+      }
+      .chart-container {
+        height: 300px;
+      }
+      .skill-buttons button {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-header {
+        padding: 20px 15px;
+      }
+      .dashboard-header h1 {
+        font-size: 2.2rem;
+      }
+      .dashboard-header p {
+        font-size: 1rem;
+      }
+      .lang-toggle {
+        top: 15px;
+        right: 15px;
+      }
+      html[dir="ltr"] .lang-toggle {
+        left: 15px;
+        right: auto;
+      }
+      .dashboard-container {
+        padding: 0 15px;
+        gap: 20px;
+      }
+      .card {
+        padding: 25px;
+      }
+      .card h3 {
+        font-size: 1.6rem;
+      }
+      .card p {
+        font-size: 0.95rem;
+      }
+      .summary-card .value {
+        font-size: 3rem;
+      }
+      .summary-card .label {
+        font-size: 1.1rem;
+      }
+      .modal-content h2 {
+        font-size: 1.8rem;
+      }
+      .modal-content p {
+        font-size: 0.95rem;
+      }
+      .chart-container {
+        height: 250px;
+      }
+      .close-button {
+        font-size: 2rem;
+        top: 5px;
+        right: 15px;
+      }
+      html[dir="ltr"] .close-button {
+        left: 15px;
+      }
+      .skill-buttons {
+        gap: 8px;
+      }
+      .skill-buttons button {
+        padding: 6px 10px;
+        font-size: 0.85rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .dashboard-header h1 {
+        font-size: 1.8rem;
+      }
+      .dashboard-header p {
+        font-size: 0.9rem;
+      }
+      .lang-toggle button {
+        padding: 8px 12px;
+        font-size: 14px;
+      }
+      .lang-toggle button i {
+        font-size: 1em;
+      }
+      .dashboard-container {
+        grid-template-columns: 1fr;
+      }
+      .card {
+        padding: 20px;
+      }
+      .card h3 {
+        font-size: 1.4rem;
+      }
+      .card .icon {
+        font-size: 2.5rem;
+      }
+      .summary-card .value {
+        font-size: 2.5rem;
+      }
+      .summary-card .label {
+        font-size: 1rem;
+      }
+      .modal-content h2 {
+        font-size: 1.5rem;
+      }
+      .modal-content p {
+        font-size: 0.9rem;
+      }
+      .chart-container {
+        height: 200px;
+      }
+      .close-button {
+        font-size: 1.8rem;
+        top: 2px;
+        right: 10px;
+      }
+      html[dir="ltr"] .close-button {
+        left: 10px;
+      }
+      .skill-buttons {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-particles" id="bgParticles"></div>
+
+  <header class="dashboard-header">
+    <div class="lang-toggle">
+      <button onclick="toggleLang()" id="langBtn">
+        <i class="fas fa-globe"></i> <span data-ar="English" data-en="العربية">English</span>
+      </button>
+    </div>
+    <h1 data-ar="لوحة تحكم مستويات تعلم اللغة الإنجليزية" data-en="English Learning Levels Dashboard">لوحة تحكم مستويات تعلم اللغة الإنجليزية</h1>
+    <p data-ar="اكتشف قدراتك اللغوية في كل مستوى" data-en="Explore your language proficiency at each level">اكتشف قدراتك اللغوية في كل مستوى</p>
+  </header>
+
+  <main class="dashboard-container">
+
+    <div class="card summary-card clickable" onclick="openOverallChartModal()">
+      <div class="icon"><i class="fas fa-chart-line"></i></div>
+      <h3 data-ar="نظرة عامة على المستويات" data-en="Overall Levels Overview">نظرة عامة على المستويات</h3>
+      <div class="value" data-value="6">6</div>
+      <div class="label" data-ar="من A1 إلى C2" data-en="From A1 to C2">من A1 إلى C2</div>
+    </div>
+
+    <div class="card level-card" onclick="openLevelModal('a1')">
+      <div class="icon"><i class="fas fa-graduation-cap"></i></div>
+      <h3 data-ar="المستوى A1" data-en="Level A1">المستوى A1</h3>
+      <p data-ar="مرحلة المبتدئين. فهم العبارات اليومية الأساسية." data-en="Beginner stage. Understand basic everyday expressions."></p>
+    </div>
+
+    <div class="card level-card" onclick="openLevelModal('a2')">
+      <div class="icon"><i class="fas fa-graduation-cap"></i></div>
+      <h3 data-ar="المستوى A2" data-en="Level A2">المستوى A2</h3>
+      <p data-ar="مرحلة ما قبل المتوسط. القدرة على التواصل في المواقف الروتينية." data-en="Pre-intermediate stage. Ability to communicate in routine tasks."></p>
+    </div>
+
+    <div class="card level-card" onclick="openLevelModal('b1')">
+      <div class="icon"><i class="fas fa-graduation-cap"></i></div>
+      <h3 data-ar="المستوى B1" data-en="Level B1">المستوى B1</h3>
+      <p data-ar="مرحلة المتوسط. التعامل مع معظم المواقف التي قد تحدث أثناء السفر." data-en="Intermediate stage. Deal with most situations likely to arise whilst travelling."></p>
+    </div>
+
+    <div class="card level-card" onclick="openLevelModal('b2')">
+      <div class="icon"><i class="fas fa-graduation-cap"></i></div>
+      <h3 data-ar="المستوى B2" data-en="Level B2">المستوى B2</h3>
+      <p data-ar="مرحلة فوق المتوسط. الفهم العام لمواضيع مجردة ومعقدة." data-en="Upper-intermediate stage. General understanding of abstract and complex topics."></p>
+    </div>
+
+    <div class="card level-card" onclick="openLevelModal('c1')">
+      <div class="icon"><i class="fas fa-graduation-cap"></i></div>
+      <h3 data-ar="المستوى C1" data-en="Level C1">المستوى C1</h3>
+      <p data-ar="مرحلة المتقدم. القدرة على استخدام اللغة بمرونة للأغراض المختلفة." data-en="Advanced stage. Can use language flexibly and effectively for various purposes."></p>
+    </div>
+
+    <div class="card level-card" onclick="openLevelModal('c2')">
+      <div class="icon"><i class="fas fa-graduation-cap"></i></div>
+      <h3 data-ar="المستوى C2" data-en="Level C2">المستوى C2</h3>
+      <p data-ar="مرحلة الإتقان. فهم كل ما يسمعه أو يقرأه تقريبًا بسهولة." data-en="Mastery stage. Can understand virtually everything heard or read with ease."></p>
+    </div>
+
+  </main>
+
+  <footer>
+    <span data-ar="&copy; 2025 SaeidHm | جميع الحقوق محفوظة" data-en="&copy; 2025 SaeidHm | All Rights Reserved">&copy; 2025 SaeidHm | جميع الحقوق محفوظة</span>
+  </footer>
+
+  <div id="levelModal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" onclick="closeLevelModal()">&times;</span>
+      <h2 id="modalLevelTitle" data-ar-prefix="المستوى " data-en-prefix="Level "></h2>
+      <div class="description-section">
+        <p id="modalOverallDescription"></p>
+      </div>
+      <div class="chart-container">
+        <canvas id="levelChart"></canvas>
+      </div>
+      <div class="description-section">
+        <h3 data-ar="شرح تفصيلي للمهارات" data-en="Detailed Skill Description" style="color: #ffd700; margin-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">شرح تفصيلي للمهارات</h3>
+        <ul id="modalDetailedSkills" class="skills-list">
+          </ul>
+      </div>
+    </div>
+  </div>
+
+  <div id="overallChartModal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" onclick="closeOverallChartModal()">&times;</span>
+      <h2 data-ar="تطور المهارات عبر المستويات" data-en="Skill Progression Across Levels">تطور المهارات عبر المستويات</h2>
+      <div class="chart-container">
+        <canvas id="overallSkillsChart"></canvas>
+      </div>
+      <div class="skill-buttons" id="overallSkillButtons">
+        <button data-skill="all" data-ar="جميع المهارات" data-en="All Skills" class="active">جميع المهارات</button>
+        <button data-skill="Reading" data-ar="القراءة" data-en="Reading">القراءة</button>
+        <button data-skill="Listening" data-ar="الاستماع" data-en="Listening">الاستماع</button>
+        <button data-skill="Speaking" data-ar="المحادثة" data-en="Speaking">المحادثة</button>
+        <button data-skill="Writing" data-ar="الكتابة" data-en="Writing">الكتابة</button>
+        <button data-skill="Grammar" data-ar="القواعد" data-en="Grammar">القواعد</button>
+        <button data-skill="Vocabulary" data-ar="المفردات" data-en="Vocabulary">المفردات</button>
+        <button data-skill="Comprehension" data-ar="الفهم" data-en="Comprehension">الفهم</button>
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+    let currentLang = 'ar'; // Default language
+    let individualLevelChart = null; // To store the Chart.js instance for individual levels
+    let overallSkillsChart = null; // To store the Chart.js instance for the overall skills
+
+    // Data for each level's skills (Reading, Listening, Speaking, Writing, Grammar, Vocabulary, Comprehension)
+    // Values are out of 100
+    const levelData = {
+      'a1': {
+        ar: {
+          title: "A1",
+          overallDescription: "في هذا المستوى، تبدأ رحلتك بتعلم الأساسيات المطلقة. يمكنك فهم واستخدام العبارات اليومية الشائعة جدًا وتقديم نفسك والآخرين.",
+          labels: ["قراءة", "استماع", "محادثة", "كتابة", "قواعد", "مفردات", "فهم"],
+          values: [20, 25, 15, 10, 20, 25, 30],
+          detailedSkills: [
+            "**قراءة (20%)**: فهم أسماء بسيطة، كلمات مألوفة، وجمل قصيرة جدًا (مثل اللافتات، قوائم الطعام).",
+            "**استماع (25%)**: فهم العبارات الأساسية جدًا إذا تحدث الناس ببطء ووضوح عن معلومات شخصية وعائلية.",
+            "**محادثة (15%)**: طرح أسئلة بسيطة والإجابة عليها حول مواضيع شخصية، والتفاعل بطريقة بسيطة إذا كان المتحدث الآخر مستعدًا لتكرار أو إعادة صياغة.",
+            "**كتابة (10%)**: كتابة بطاقات بريدية قصيرة، ملء نماذج بمعلومات شخصية بسيطة.",
+            "**قواعد (20%)**: استخدام تراكيب نحوية أساسية جدًا (مثل 'أنا أكون'، 'أنت تكون').",
+            "**مفردات (25%)**: معرفة عدد محدود من الكلمات والعبارات المتعلقة بالاحتياجات اليومية المباشرة.",
+            "**فهم (30%)**: القدرة على استيعاب الأفكار المباشرة والمحددة جدًا في سياقات بسيطة ومألوفة."
+          ]
+        },
+        en: {
+          title: "A1",
+          overallDescription: "At this level, you start your journey with the absolute basics. You can understand and use very common everyday expressions and introduce yourself and others.",
+          labels: ["Reading", "Listening", "Speaking", "Writing", "Grammar", "Vocabulary", "Comprehension"],
+          values: [20, 25, 15, 10, 20, 25, 30],
+          detailedSkills: [
+            "**Reading (20%)**: Understand simple names, familiar words, and very short sentences (e.g., signs, menus).",
+            "**Listening (25%)**: Understand very basic phrases if people speak slowly and clearly about personal and family information.",
+            "**Speaking (15%)**: Ask and answer simple questions on personal topics, interacting in a simple way if the other speaker is prepared to repeat or rephrase.",
+            "**Writing (10%)**: Write short postcards, fill in forms with simple personal details.",
+            "**Grammar (20%)**: Use very basic grammatical structures (e.g., 'I am', 'you are').",
+            "**Vocabulary (25%)**: Know a limited number of words and phrases related to immediate concrete needs.",
+            "**Comprehension (30%)**: Ability to grasp very direct and specific ideas in simple and familiar contexts."
+          ]
+        }
+      },
+      'a2': {
+        ar: {
+          title: "A2",
+          overallDescription: "تتقدم هنا لفهم الجمل والعبارات المتعلقة بمجالات أكثر صلة (معلومات شخصية وعائلية بسيطة، التسوق، الجغرافيا المحلية، التوظيف). يمكنك التواصل في المهام الروتينية البسيطة.",
+          labels: ["قراءة", "استماع", "محادثة", "كتابة", "قواعد", "مفردات", "فهم"],
+          values: [40, 45, 35, 30, 40, 45, 50],
+          detailedSkills: [
+            "**قراءة (40%)**: فهم نصوص قصيرة وبسيطة، العثور على معلومات محددة يمكن التنبؤ بها في مواد بسيطة يومية مثل الإعلانات، النشرات، قوائم الطعام، والجداول الزمنية.",
+            "**استماع (45%)**: فهم العبارات والجمل الأكثر تعقيدًا المتعلقة بمجالات الخبرة الشخصية (معلومات شخصية وعائلية، التسوق، العمل، البيئة المحلية) إذا تحدث الناس بوضوح وببطء.",
+            "**محادثة (35%)**: التواصل في المهام البسيطة والروتينية التي تتطلب تبادلًا مباشرًا ومبسطًا للمعلومات حول أمور مألوفة، ووصف الخلفية والبيئة المباشرة.",
+            "**كتابة (30%)**: كتابة نصوص قصيرة وبسيطة حول مواضيع مألوفة أو ذات اهتمام شخصي، مثل رسالة شخصية قصيرة أو ملاحظة.",
+            "**قواعد (40%)**: استخدام تراكيب نحوية أساسية بشكل أكثر مرونة، بما في ذلك الماضي البسيط والمضارع المستمر.",
+            "**مفردات (45%)**: زيادة المفردات لتشمل الموضوعات اليومية مثل العمل، التسوق، الترفيه، السفر.",
+            "**فهم (50%)**: القدرة على استيعاب المحتوى الأساسي والرسالة الرئيسية في مواقف يومية ومألوفة."
+          ]
+        },
+        en: {
+          title: "A2",
+          overallDescription: "Here you progress to understanding sentences and frequently used expressions related to areas of most immediate relevance (basic personal and family information, shopping, local geography, employment). You can communicate in simple, routine tasks.",
+          labels: ["Reading", "Listening", "Speaking", "Writing", "Grammar", "Vocabulary", "Comprehension"],
+          values: [40, 45, 35, 30, 40, 45, 50],
+          detailedSkills: [
+            "**Reading (40%)**: Understand short, simple texts, finding predictable specific information in simple everyday material such as advertisements, prospectuses, menus and timetables.",
+            "**Listening (45%)**: Understand phrases and higher frequency vocabulary related to areas of most immediate personal relevance (e.g. basic personal and family information, shopping, local geography, employment) if people speak clearly and slowly.",
+            "**Speaking (35%)**: Communicate in simple and routine tasks requiring a simple and direct exchange of information on familiar topics, and describe aspects of background and immediate environment.",
+            "**Writing (30%)**: Write short, simple texts on familiar topics or topics of personal interest, such as a short personal letter or note.",
+            "**Grammar (40%)**: Use basic grammatical structures with more flexibility, including simple past and present continuous tenses.",
+            "**Vocabulary (45%)**: Increased vocabulary to cover everyday topics like work, shopping, leisure, travel.",
+            "**Comprehension (50%)**: Ability to grasp the main content and key message in everyday and familiar situations."
+          ]
+        }
+      },
+      'b1': {
+        ar: {
+          title: "B1",
+          overallDescription: "في هذا المستوى، يمكنك فهم النقاط الرئيسية في مدخلات واضحة ومعيارية حول أمور مألوفة تحدث بانتظام في العمل أو المدرسة أو الترفيه، والتعامل مع معظم المواقف التي قد تنشأ أثناء السفر.",
+          labels: ["قراءة", "استماع", "محادثة", "كتابة", "قواعد", "مفردات", "فهم"],
+          values: [60, 65, 55, 50, 60, 65, 70],
+          detailedSkills: [
+            "**قراءة (60%)**: فهم نصوص تتألف من مفردات شائعة وعبارات يومية، ويمكنه فهم المعنى العام لمعظم النصوص.",
+            "**استماع (65%)**: فهم النقاط الرئيسية في مدخلات واضحة ومعيارية حول أمور مألوفة تحدث بانتظام في العمل أو المدرسة أو الترفيه، مثل البث الإذاعي أو التلفزيوني حول المواضيع الراهنة.",
+            "**محادثة (55%)**: التعامل مع معظم المواقف التي قد تنشأ أثناء السفر في منطقة يتحدث فيها اللغة، والإنتاج البسيط للنص المترابط حول مواضيع مألوفة أو ذات اهتمام شخصي.",
+            "**كتابة (50%)**: كتابة نصوص بسيطة مترابطة حول مواضيع مألوفة أو ذات اهتمام شخصي (مثل رسائل شخصية تصف تجارب وانطباعات).",
+            "**قواعد (60%)**: استخدام غالبية تراكيب الأزمنة الأساسية، والقدرة على تصحيح الأخطاء الشائعة.",
+            "**مفردات (65%)**: مفردات كافية للتعبير عن الذات في معظم المواقف اليومية.",
+            "**فهم (70%)**: القدرة على فهم الأفكار الرئيسية والتفاصيل المهمة في محادثات ونصوص حول مواضيع مألوفة."
+          ]
+        },
+        en: {
+          title: "B1",
+          overallDescription: "At this level, you can understand the main points of clear standard input on familiar matters regularly encountered in work, school, leisure, etc., and deal with most situations likely to arise whilst travelling.",
+          labels: ["Reading", "Listening", "Speaking", "Writing", "Grammar", "Vocabulary", "Comprehension"],
+          values: [60, 65, 55, 50, 60, 65, 70],
+          detailedSkills: [
+            "**Reading (60%)**: Understand texts composed of high frequency everyday vocabulary and expressions, and grasp the main meaning of most texts.",
+            "**Listening (65%)**: Understand the main points of clear standard input on familiar matters regularly encountered in work, school, leisure, etc., including radio or TV broadcasts on current affairs.",
+            "**Speaking (55%)**: Deal with most situations likely to arise whilst travelling in an area where the language is spoken, and produce simple connected text on topics which are familiar or of personal interest.",
+            "**Writing (50%)**: Write simple connected text on topics which are familiar or of personal interest (e.g. personal letters describing experiences and impressions).",
+            "**Grammar (60%)**: Use most basic tense structures, and can correct common errors.",
+            "**Vocabulary (65%)**: Sufficient vocabulary to express oneself in most everyday situations.",
+            "**Comprehension (70%)**: Ability to understand main ideas and important details in conversations and texts on familiar topics."
+          ]
+        }
+      },
+      'b2': {
+        ar: {
+          title: "B2",
+          overallDescription: "يمكنك فهم الأفكار الرئيسية للنصوص المعقدة حول مواضيع ملموسة ومجردة، بما في ذلك المناقشات التقنية في مجال تخصصك. يمكنك التفاعل بتلقائية بطلاقة تسمح بالتواصل المنتظم مع الناطقين الأصليين دون جهد كبير من أي من الطرفين.",
+          labels: ["قراءة", "استماع", "محادثة", "كتابة", "قواعد", "مفردات", "فهم"],
+          values: [75, 70, 75, 70, 75, 70, 80],
+          detailedSkills: [
+            "**قراءة (75%)**: فهم الأفكار الرئيسية للنصوص المعقدة حول مواضيع ملموسة ومجردة، بما في ذلك المقالات الصحفية والتقارير الفنية.",
+            "**استماع (70%)**: فهم المحاضرات والخطب الطويلة ومتابعة النقاشات المعقدة بشرط أن تكون الموضوعات مألوفة، وفهم معظم الأخبار التلفزيونية والبرامج حول الشؤون الجارية.",
+            "**محادثة (75%)**: التفاعل بتلقائية بطلاقة تسمح بالتواصل المنتظم مع الناطقين الأصليين دون جهد كبير من أي من الطرفين. المشاركة الفعالة في النقاشات حول مواضيع مختلفة.",
+            "**كتابة (70%)**: كتابة نصوص واضحة ومفصلة حول مجموعة واسعة من المواضيع المتعلقة بمجال اهتمامه، وكتابة مقالات أو تقارير تنقل المعلومات أو تعطي أسبابًا لدعم أو دحض وجهة نظر معينة.",
+            "**قواعد (75%)**: إتقان جيد لمجموعة واسعة من التراكيب النحوية، مع أخطاء قليلة لا تعيق الفهم.",
+            "**مفردات (70%)**: مفردات غنية ومتنوعة تسمح بالمرونة في التعبير عن الأفكار.",
+            "**فهم (80%)**: القدرة على استيعاب التفاصيل الدقيقة والمعاني الضمنية في النصوص والمحادثات الأكثر تعقيدًا."
+          ]
+        },
+        en: {
+          title: "B2",
+          overallDescription: "You can understand the main ideas of complex text on both concrete and abstract topics, including technical discussions in your field of specialisation. You can interact with a degree of fluency and spontaneity that makes regular interaction with native speakers quite possible without strain for either party.",
+          labels: ["Reading", "Listening", "Speaking", "Writing", "Grammar", "Vocabulary", "Comprehension"],
+          values: [75, 70, 75, 70, 75, 70, 80],
+          detailedSkills: [
+            "**Reading (75%)**: Understand the main ideas of complex text on both concrete and abstract topics, including newspaper articles and technical reports.",
+            "**Listening (70%)**: Understand extended speech and lectures and follow complex lines of argument provided the topic is reasonably familiar, and understand most TV news and current affairs programmes.",
+            "**Speaking (75%)**: Interact with a degree of fluency and spontaneity that makes regular interaction with native speakers quite possible without strain for either party. Can take an active part in discussions on a wide range of subjects.",
+            "**Writing (70%)**: Write clear, detailed text on a wide range of subjects related to his/her field of interest, and write essays or reports, passing on information or giving reasons in support of or against a particular point of view.",
+            "**Grammar (75%)**: Good command of a wide range of grammatical structures, with few errors that do not impede understanding.",
+            "**Vocabulary (70%)**: Rich and varied vocabulary allowing for flexibility in expressing ideas.",
+            "**Comprehension (80%)**: Ability to grasp fine details and implicit meanings in more complex texts and conversations."
+          ]
+        }
+      },
+      'c1': {
+        ar: {
+          title: "C1",
+          overallDescription: "يمكنك فهم مجموعة واسعة من النصوص الطويلة والصعبة، والتعرف على المعاني الضمنية. يمكنك التعبير عن نفسك بطلاقة وتلقائية دون البحث الواضح عن الكلمات.",
+          labels: ["قراءة", "استماع", "محادثة", "كتابة", "قواعد", "مفردات", "فهم"],
+          values: [90, 85, 85, 80, 90, 85, 90],
+          detailedSkills: [
+            "**قراءة (90%)**: فهم مجموعة واسعة من النصوص الطويلة والصعبة، والتعرف على المعاني الضمنية، بما في ذلك النصوص الأكاديمية والأدبية المتخصصة.",
+            "**استماع (85%)**: فهم الكلام الممتد حتى عندما لا يكون منظمًا بشكل جيد وعندما تكون العلاقات ضمنية وليست صريحة، وفهم البرامج التلفزيونية والأفلام دون عناء كبير.",
+            "**محادثة (85%)**: التعبير عن الذات بطلاقة وتلقائية دون البحث الواضح عن الكلمات أو العبارات. استخدام اللغة بمرونة وفعالية للأغراض الاجتماعية والأكاديمية والمهنية.",
+            "**كتابة (80%)**: كتابة نصوص واضحة ومنظمة جيدًا ومفصلة حول مواضيع معقدة، وتوسيع وتطوير الأفكار ببراعة.",
+            "**قواعد (90%)**: إتقان ممتاز للقواعد النحوية، مع أخطاء نادرة جدًا وغير مؤثرة.",
+            "**مفردات (85%)**: مفردات واسعة تسمح بالتعبير الدقيق، ومعرفة قوية بالتعابير الاصطلاحية.",
+            "**فهم (90%)**: القدرة على استيعاب النصوص والمحادثات المعقدة بكفاءة عالية، بما في ذلك الفروق الدقيقة في المعنى."
+          ]
+        },
+        en: {
+          title: "C1",
+          overallDescription: "You can understand a wide range of demanding, longer texts, and recognise implicit meaning. You can express yourself fluently and spontaneously without much obvious searching for expressions.",
+          labels: ["Reading", "Listening", "Speaking", "Writing", "Grammar", "Vocabulary", "Comprehension"],
+          values: [90, 85, 85, 80, 90, 85, 90],
+          detailedSkills: [
+            "**Reading (90%)**: Understand a wide range of demanding, longer texts, and recognise implicit meaning, including specialised academic and literary texts.",
+            "**Listening (85%)**: Understand extended speech even when it is not clearly structured and when relationships are only implied and not signalled explicitly, and understand television programmes and films without too much effort.",
+            "**Speaking (85%)**: Express oneself fluently and spontaneously without much obvious searching for expressions. Can use language flexibly and effectively for social, academic and professional purposes.",
+            "**Writing (80%)**: Write clear, well-structured, detailed text on complex subjects, expanding and supporting points with sub-points, and developing particular points.",
+            "**Grammar (90%)**: Excellent command of grammatical rules, with very rare and non-impeding errors.",
+            "**Vocabulary (85%)**: Broad vocabulary allowing for precise expression, and strong knowledge of idiomatic expressions.",
+            "**Comprehension (90%)**: Ability to understand complex texts and conversations with high efficiency, including subtle nuances of meaning."
+          ]
+        }
+      },
+      'c2': {
+        ar: {
+          title: "C2",
+          overallDescription: "يمكنك فهم كل ما يسمعه أو يقرأه تقريبًا بسهولة. يمكنك تلخيص المعلومات من مصادر منطوقة أو مكتوبة مختلفة وإعادة بناء الحجج والحسابات في عرض متماسك.",
+          labels: ["قراءة", "استماع", "محادثة", "كتابة", "قواعد", "مفردات", "فهم"],
+          values: [100, 95, 95, 90, 100, 95, 100],
+          detailedSkills: [
+            "**قراءة (100%)**: فهم كل أنواع النصوص الطويلة والمعقدة، بما في ذلك النصوص التجريدية، البنيوية أو اللغوية المعقدة مثل الكتب المدرسية، والمقالات المتخصصة، والأعمال الأدبية.",
+            "**استماع (95%)**: فهم الكلام السريع للناطقين الأصليين دون صعوبة، حتى في الظروف الصعبة (مثل الضوضاء المحيطة).",
+            "**محادثة (95%)**: التعبير عن الذات بتلقائية كبيرة وطلاقة ودقة، والتمييز بين الفروق الدقيقة في المعنى حتى في المواقف المعقدة.",
+            "**كتابة (90%)**: كتابة نصوص واضحة وسلسة وصحيحة نحويًا في أسلوب مناسب، مع هيكلة منطقية تسمح للقارئ بمتابعة الحجج الرئيسية.",
+            "**قواعد (100%)**: إتقان كامل ودقيق لجميع التراكيب النحوية، مع عدم وجود أخطاء تذكر.",
+            "**مفردات (95%)**: مفردات واسعة للغاية ودقيقة للغاية، بما في ذلك التعابير الاصطلاحية والنادرة.",
+            "**فهم (100%)**: القدرة على فهم أي نص أو محادثة بأي تعقيد، مع استيعاب كامل لجميع المعاني الظاهرة والضمنية."
+          ]
+        },
+        en: {
+          title: "C2",
+          overallDescription: "You can understand virtually everything heard or read with ease. You can summarise information from different spoken and written sources, reconstructing arguments and accounts in a coherent presentation.",
+          labels: ["Reading", "Listening", "Speaking", "Writing", "Grammar", "Vocabulary", "Comprehension"],
+          values: [100, 95, 95, 90, 100, 95, 100],
+          detailedSkills: [
+            "**Reading (100%)**: Understand virtually all types of long, complex texts, including abstract, structurally or linguistically complex texts such as manuals, specialised articles and literary works.",
+            "**Listening (95%)**: Understand rapid native speech without difficulty, even in difficult conditions (e.g. ambient noise).",
+            "**Speaking (95%)**: Express oneself with great spontaneity, fluency and precision, differentiating finer shades of meaning even in more complex situations.",
+            "**Writing (90%)**: Write clear, smoothly flowing, grammatically correct texts in an appropriate style, with a logical structure that helps the reader to follow the main arguments.",
+            "**Grammar (100%)**: Complete and accurate command of all grammatical structures, with virtually no errors.",
+            "**Vocabulary (95%)**: Very extensive and precise vocabulary, including idiomatic and rare expressions.",
+            "**Comprehension (100%)**: Ability to comprehend any text or conversation of any complexity, with full grasp of all explicit and implicit meanings."
+          ]
+        }
+      }
+    };
+
+    // Overall skill progression data (for the new overall chart modal)
+    // Keys match levelData labels, values are arrays per level (A1-C2)
+    const overallSkillProgression = {
+        'Reading': [20, 40, 60, 75, 90, 100],
+        'Listening': [25, 45, 65, 70, 85, 95],
+        'Speaking': [15, 35, 55, 75, 85, 95],
+        'Writing': [10, 30, 50, 70, 80, 90],
+        'Grammar': [20, 40, 60, 75, 90, 100],
+        'Vocabulary': [25, 45, 65, 70, 85, 95],
+        'Comprehension': [30, 50, 70, 80, 90, 100]
+    };
+    const overallSkillLabels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+    const overallSkillArabicLabels = {
+        'Reading': 'القراءة', 'Listening': 'الاستماع', 'Speaking': 'المحادثة',
+        'Writing': 'الكتابة', 'Grammar': 'القواعد', 'Vocabulary': 'المفردات',
+        'Comprehension': 'الفهم'
+    };
+
+
+    function applyTranslation() {
+      const elements = document.querySelectorAll('[data-ar], [data-en]');
+      const htmlElement = document.querySelector('html');
+      const langBtnTextSpan = document.querySelector('#langBtn span');
+      const titleElement = document.querySelector('title');
+      const modalLevelTitle = document.getElementById('modalLevelTitle');
+      const modalOverallDescription = document.getElementById('modalOverallDescription');
+      const modalDetailedSkillsList = document.getElementById('modalDetailedSkills');
+      const overallSkillButtons = document.querySelectorAll('#overallSkillButtons button');
+
+      htmlElement.setAttribute('lang', currentLang);
+      htmlElement.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
+
+      elements.forEach(el => {
+        if (el.dataset.ar && el.dataset.en) { // Check if both attributes exist
+            el.textContent = currentLang === 'en' ? el.dataset.en : el.dataset.ar;
+        }
+      });
+
+      // Special handling for title tag
+      if (titleElement) {
+        titleElement.textContent = currentLang === 'en' ? titleElement.dataset.en : titleElement.dataset.ar;
+      }
+
+      // Update button text for language toggle
+      if (langBtnTextSpan) {
+          langBtnTextSpan.textContent = currentLang === 'ar' ? langBtnTextSpan.dataset.ar : langBtnTextSpan.dataset.en;
+      }
+
+      // Update modal content if individual level modal is open
+      if (modalLevelTitle && modalLevelTitle.dataset.currentLevel) {
+          const currentLevelId = modalLevelTitle.dataset.currentLevel;
+          const levelInfo = levelData[currentLevelId][currentLang];
+
+          modalLevelTitle.textContent = (currentLang === 'ar' ? modalLevelTitle.dataset.arPrefix : modalLevelTitle.dataset.enPrefix) + levelInfo.title;
+          modalOverallDescription.textContent = levelInfo.overallDescription;
+
+          // Clear previous detailed skills
+          modalDetailedSkillsList.innerHTML = '';
+          levelInfo.detailedSkills.forEach(skill => {
+            const li = document.createElement('li');
+            li.innerHTML = skill; // Use innerHTML to allow for bold tags
+            modalDetailedSkillsList.appendChild(li);
+          });
+
+          updateIndividualLevelChart(currentLevelId); // Update chart with new labels
+      }
+
+      // Update overall skills chart labels if overall modal is open
+      if (overallSkillsChart) {
+          // Re-trigger update to get correct labels
+          const activeButton = document.querySelector('#overallSkillButtons button.active');
+          if (activeButton) {
+              const skill = activeButton.dataset.skill;
+              updateOverallSkillsChart(skill);
+          }
+      }
+
+      // Update skill button texts in overall modal
+      overallSkillButtons.forEach(button => {
+        button.textContent = currentLang === 'ar' ? button.dataset.ar : button.dataset.en;
+      });
+    }
+
+    function toggleLang() {
+      currentLang = currentLang === 'ar' ? 'en' : 'ar';
+      applyTranslation();
+    }
+
+    // --- Individual Level Modal Functions ---
+    function openLevelModal(levelId) {
+      const modal = document.getElementById('levelModal');
+      const modalTitle = document.getElementById('modalLevelTitle');
+      const modalOverallDescription = document.getElementById('modalOverallDescription');
+      const modalDetailedSkillsList = document.getElementById('modalDetailedSkills');
+      const ctx = document.getElementById('levelChart').getContext('2d');
+
+      const data = levelData[levelId][currentLang];
+
+      modalTitle.textContent = (currentLang === 'ar' ? modalTitle.dataset.arPrefix : modalTitle.dataset.enPrefix) + data.title;
+      modalTitle.dataset.currentLevel = levelId; // Store current level ID
+      modalOverallDescription.textContent = data.overallDescription;
+
+      modalDetailedSkillsList.innerHTML = '';
+      data.detailedSkills.forEach(skill => {
+        const li = document.createElement('li');
+        li.innerHTML = skill; // Use innerHTML to allow for bold tags
+        modalDetailedSkillsList.appendChild(li);
+      });
+
+      if (individualLevelChart) {
+        individualLevelChart.destroy(); // Destroy previous chart instance
+      }
+
+      individualLevelChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+          labels: data.labels,
+          datasets: [{
+            label: currentLang === 'ar' ? 'مستوى الإتقان (%)' : 'Proficiency Level (%)',
+            data: data.values,
+            backgroundColor: 'rgba(255, 215, 0, 0.4)', // Gold with transparency
+            borderColor: '#ffd700', // Gold
+            borderWidth: 2,
+            pointBackgroundColor: '#ffd700',
+            pointBorderColor: '#fff',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: '#ffd700'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true,
+              labels: {
+                color: 'white', // Legend label color
+                font: {
+                  family: 'Cairo, sans-serif',
+                  size: 14,
+                  weight: 'bold'
+                }
+              }
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        return `${context.label}: ${context.raw}%`;
+                    }
+                },
+                bodyFont: {
+                  family: 'Cairo, sans-serif'
+                },
+                titleFont: {
+                  family: 'Cairo, sans-serif'
+                }
+            }
+          },
+          scales: {
+            r: {
+              angleLines: {
+                color: 'rgba(255, 255, 255, 0.2)' // Grid line color
+              },
+              grid: {
+                color: 'rgba(255, 255, 255, 0.3)' // Grid line color
+              },
+              pointLabels: {
+                color: 'white', // Label for each point (e.g., Reading)
+                font: {
+                  family: 'Cairo, sans-serif',
+                  size: 14
+                }
+              },
+              ticks: {
+                display: false, // Hide the ticks values (0, 25, 50, 75, 100)
+                beginAtZero: true,
+                max: 100,
+                stepSize: 25,
+                color: 'white'
+              },
+              suggestedMin: 0,
+              suggestedMax: 100
+            }
+          }
+        }
+      });
+
+      modal.style.display = 'flex'; // Use flex to center
+    }
+
+    function updateIndividualLevelChart(levelId) {
+        if (individualLevelChart) {
+            const data = levelData[levelId][currentLang];
+            individualLevelChart.data.labels = data.labels;
+            individualLevelChart.data.datasets[0].data = data.values;
+            individualLevelChart.data.datasets[0].label = currentLang === 'ar' ? 'مستوى الإتقان (%)' : 'Proficiency Level (%)';
+            individualLevelChart.options.plugins.legend.labels.font.family = 'Cairo, sans-serif';
+            individualLevelChart.options.scales.r.pointLabels.font.family = 'Cairo, sans-serif';
+            individualLevelChart.update();
+        }
+    }
+
+    function closeLevelModal() {
+      const modal = document.getElementById('levelModal');
+      modal.style.display = 'none';
+      if (individualLevelChart) {
+        individualLevelChart.destroy(); // Destroy chart when modal is closed
+        individualLevelChart = null;
+      }
+    }
+
+    // --- Overall Skills Chart Modal Functions ---
+    function openOverallChartModal() {
+        const modal = document.getElementById('overallChartModal');
+        const ctx = document.getElementById('overallSkillsChart').getContext('2d');
+        const skillButtonsContainer = document.getElementById('overallSkillButtons');
+
+        if (overallSkillsChart) {
+            overallSkillsChart.destroy(); // Destroy previous chart instance
+        }
+
+        // Initialize with 'all' skills view
+        renderOverallSkillsChart('all', ctx);
+
+        // Add event listeners to skill buttons
+        skillButtonsContainer.querySelectorAll('button').forEach(button => {
+            button.onclick = () => {
+                skillButtonsContainer.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                renderOverallSkillsChart(button.dataset.skill, ctx);
+            };
+        });
+
+        modal.style.display = 'flex';
+    }
+
+    function renderOverallSkillsChart(skillType, ctx) {
+        let labels = overallSkillLabels;
+        let datasets = [];
+
+        if (skillType === 'all') {
+            // Display all skills as separate datasets
+            Object.keys(overallSkillProgression).forEach((skillKey, index) => {
+                datasets.push({
+                    label: currentLang === 'ar' ? overallSkillArabicLabels[skillKey] : skillKey,
+                    data: overallSkillProgression[skillKey],
+                    backgroundColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.4)`,
+                    borderColor: `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)})`,
+                    borderWidth: 2,
+                    fill: false, // For line chart style
+                    tension: 0.3 // Smooth lines
+                });
+            });
+            // If showing 'all', use a bar chart instead for better comparison
+            if (overallSkillsChart) {
+                overallSkillsChart.destroy();
+            }
+            overallSkillsChart = new Chart(ctx, {
+                type: 'bar', // Bar chart for 'all skills' view
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                color: 'white',
+                                font: {
+                                    family: 'Cairo, sans-serif',
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw}%`;
+                                }
+                            },
+                             bodyFont: {
+                                family: 'Cairo, sans-serif'
+                            },
+                            titleFont: {
+                                family: 'Cairo, sans-serif'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            ticks: { color: 'white', font: { family: 'Cairo, sans-serif' } },
+                            title: {
+                                display: true,
+                                text: currentLang === 'ar' ? 'المستويات' : 'Levels',
+                                color: 'white',
+                                font: { family: 'Cairo, sans-serif', size: 16, weight: 'bold' }
+                            }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            ticks: { color: 'white', font: { family: 'Cairo, sans-serif' }, stepSize: 20 },
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: currentLang === 'ar' ? 'مستوى الإتقان (%)' : 'Proficiency Level (%)',
+                                color: 'white',
+                                font: { family: 'Cairo, sans-serif', size: 16, weight: 'bold' }
+                            }
+                        }
+                    }
+                }
+            });
+
+        } else {
+            // Display single skill progression
+            const data = overallSkillProgression[skillType];
+            const label = currentLang === 'ar' ? overallSkillArabicLabels[skillType] : skillType;
+
+            datasets.push({
+                label: label + (currentLang === 'ar' ? ' (%)' : ' (%)'),
+                data: data,
+                backgroundColor: 'rgba(75, 192, 192, 0.4)', // Teal with transparency
+                borderColor: '#4ECDC4', // Teal
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4
+            });
+
+            if (overallSkillsChart) {
+                overallSkillsChart.destroy();
+            }
+            overallSkillsChart = new Chart(ctx, {
+                type: 'line', // Line chart for single skill progression
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                color: 'white',
+                                font: {
+                                    family: 'Cairo, sans-serif',
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw}%`;
+                                }
+                            },
+                             bodyFont: {
+                                family: 'Cairo, sans-serif'
+                            },
+                            titleFont: {
+                                family: 'Cairo, sans-serif'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            ticks: { color: 'white', font: { family: 'Cairo, sans-serif' } },
+                            title: {
+                                display: true,
+                                text: currentLang === 'ar' ? 'المستويات' : 'Levels',
+                                color: 'white',
+                                font: { family: 'Cairo, sans-serif', size: 16, weight: 'bold' }
+                            }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            ticks: { color: 'white', font: { family: 'Cairo, sans-serif' }, stepSize: 20 },
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: currentLang === 'ar' ? 'مستوى الإتقان (%)' : 'Proficiency Level (%)',
+                                color: 'white',
+                                font: { family: 'Cairo, sans-serif', size: 16, weight: 'bold' }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    function closeOverallChartModal() {
+        const modal = document.getElementById('overallChartModal');
+        modal.style.display = 'none';
+        if (overallSkillsChart) {
+            overallSkillsChart.destroy();
+            overallSkillsChart = null;
+        }
+        // Reset active button
+        document.querySelector('#overallSkillButtons button[data-skill="all"]').classList.add('active');
+        document.querySelector('#overallSkillButtons button[data-skill="all"]').scrollIntoView({ behavior: 'smooth', inline: 'center' });
+    }
+
+    // --- Interactive Background Particles ---
+    function createParticles() {
+        const container = document.getElementById('bgParticles');
+        const numParticles = 30; // Number of particles
+
+        for (let i = 0; i < numParticles; i++) {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            const size = Math.random() * 20 + 10; // 10px to 30px
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            particle.style.left = `${Math.random() * 100}%`;
+            particle.style.top = `${Math.random() * 100}%`;
+            particle.style.animationDelay = `${Math.random() * -20}s`; // Start at random points in animation cycle
+            particle.style.animationDuration = `${Math.random() * 10 + 15}s`; // 15s to 25s
+            container.appendChild(particle);
+        }
+    }
+
+
+    // Initialize translations and direction on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      // Store Arabic text initially for elements that have data-en (meaning they are translatable)
+      document.querySelectorAll('[data-en]').forEach(el => {
+        if (!el.hasAttribute('data-ar')) {
+          el.setAttribute('data-ar', el.textContent);
+        }
+      });
+      // Set initial state
+      applyTranslation();
+      createParticles(); // Create background particles
+    });
+  </script>
+
+</body>
+</html>
